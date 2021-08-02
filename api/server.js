@@ -43,32 +43,59 @@ server.get('/api/users/:id', (req,res) => {
 })
 
 //POST /api/users
-server.post('/api/users', (req, res) => {
-    const { name, bio } = req.body
-//    res.json({message: 'POST: creates a new user'})
-    User.insert({ name, bio })
-    .then(user =>{
-        if (!user) {
-            res.status(400).json({ message: "Please provide name and bio for the user" })
-        } else {
-            res.status(201).json(user)
+server.post('/api/user', async(req, res)=>{
+    try{
+        const newUserData = req.body
+        if(!newUserData.name || !newUserData.bio){
+            res.status(422).json({
+                message: "Please provide name and bio for the user"
+            })
+        }else{
+            const newUser = await User.insert(newUserData)
+            res.status(201).json(newUser)
         }
-    })
-    .catch(err => {
-        res.status(500).json({ message: "There was an error while saving the user to the database" })
-    })
+    }catch(err){
+        res.status(500).json({
+            error: "There was an error while saving the user to the database",
+            message: err.message,
+            stack: err.stack
+        })
+    }
 })
 	
 //PUT /api/users/:id
 server.put('/api/users/:id', (req,res) => {
     const { id } = req.params
-    res.json({message: `PUT user with id of ${id}`})
+    const { name, bio } = req.body
+    // res.json({message: `PUT user with id of ${id}`})
+    User.update(id, { name, bio })
+   .then(updatedUser => {
+       res.json(updatedUser)
+       if(!updatedUser) {
+           res.status(404).json({ message: "The user with the specified ID does not exist" })    
+       } else {
+           res.status(200).json(updatedUser) //defaults to status 200
+       }
+   })
+   .catch(err => {
+    res.status(500).json({message: err.message})
+})
 })
 
 //DELETE /api/users/:id	
-server.delete('/api/users/:id', (req,res) => {
-    const { id } = req.params
-    res.json({message: `DELETE user with id of ${id}`})
+server.delete('/api/user/:id', (req,res)=>{
+    User.remove(req.params.id)
+    .then(data =>{
+        console.log("deleted", data)
+        res.json(data)
+    })
+    .catch(err => {
+    res.status(500).json({
+        error: 'The user could not be removed',
+        message: err.message,
+        stack: err.stack
+    })})
+
 })
 
 	
