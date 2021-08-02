@@ -45,7 +45,18 @@ server.get('/api/users/:id', (req,res) => {
 //POST /api/users
 server.post('/api/users', (req, res) => {
     const { name, bio } = req.body
-   res.json({message: 'POST: creates a new user'})
+//    res.json({message: 'POST: creates a new user'})
+    User.insert({ name, bio })
+    .then(user =>{
+        if (!user) {
+            res.status(400).json({ message: "Please provide name and bio for the user" })
+        } else {
+            res.status(201).json(user)
+        }
+    })
+    .catch(err => {
+        res.status(500).json({ message: "There was an error while saving the user to the database" })
+    })
 })
 	
 //PUT /api/users/:id
