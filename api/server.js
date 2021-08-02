@@ -1,23 +1,42 @@
 // BUILD YOUR SERVER HERE
 const express = require('express') // same as import xyz from xyz
+const User = require('./users/model')
 const server = express()
 server.use(express.json())
+
+//GET /api/users
+server.get('/api/users', (req, res) => {
+    // res.json({message: 'GET All Users'})
+    User.find()
+    .then(users => {
+        res.status(200).json(users)
+        // OR // res.json(users)
+    })
+    .catch(err => {
+        res.status(500).json({
+            message: 'error getting users',
+            err: err.message, 
+        })
+    })
+})
+
+//GET /api/users/:id
+server.get('/api/users/:id', (req,res) => {
+    const { id } = req.params
+    res.json({message: `GET user with id of ${id}`})
+})
 
 //POST /api/users
 server.post('/api/users', (req, res) => {
     const { name, bio } = req.body
    res.json({message: 'POST: creates a new user'})
 })
-
-//GET /api/users
-server.get('/api/users', (req, res) => {
-    res.json({message: 'GET All Users'})
-})
-//GET /api/users/:id
-server.get('/api/users/:id', (req,res) => {
+	
+//PUT /api/users/:id
+server.put('/api/users/:id', (req,res) => {
     const { id } = req.params
-    res.json({message: `GET user with id of ${id}`})
-})	
+    res.json({message: `PUT user with id of ${id}`})
+})
 
 //DELETE /api/users/:id	
 server.delete('/api/users/:id', (req,res) => {
@@ -25,11 +44,7 @@ server.delete('/api/users/:id', (req,res) => {
     res.json({message: `DELETE user with id of ${id}`})
 })
 
-//PUT /api/users/:id
-server.put('/api/users/:id', (req,res) => {
-    const { id } = req.params
-    res.json({message: `PUT user with id of ${id}`})
-})	
+	
 
 // a catch all if all fails
 server.use('*', (req, res) => {
